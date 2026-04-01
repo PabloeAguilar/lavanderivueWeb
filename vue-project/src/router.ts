@@ -3,7 +3,6 @@ import HelloWorld from "./components/HelloWorld.vue";
 import RegistroPedido from "./components/RegistroPedido.vue";
 import BusquedaPedido from "./components/EntregaPedidos.vue";
 import ModuloClientes from "./components/ModuloClientes.vue";
-import Configuracion from "./components/Configuracion.vue";
 import PedidosPorDia from './components/PedidosPorDia.vue';
 
 const rutas = [
