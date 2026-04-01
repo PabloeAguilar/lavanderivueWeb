@@ -28,11 +28,6 @@ const rutas = [
         component: ModuloClientes
     },
     {
-        path: '/configuracion',
-        name: 'Configuracion',
-        component: Configuracion
-    },
-    {
         path: '/pedidosPorDia',
         name: 'PedidosPorDia',
         component: PedidosPorDia
