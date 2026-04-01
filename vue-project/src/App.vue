@@ -29,7 +29,6 @@ const listaModulos = [
   new Menu("Búsqueda y Entrega", "Búsqueda y Entrega pedidos", "/busqueda"),
   new Menu("Libreta de pedidos", "Pedidos por día", "/pedidosPorDia"),
   new Menu("Clientes", "Lista de clientes", "/clientes"),
-  new Menu("Configuración", "Configuración", "/configuracion"),
 ]
 function menuSeleccionado(nombreModulo: string) {
   menuActual.value = nombreModulo;
