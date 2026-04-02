@@ -3,7 +3,6 @@
 import { ref, onMounted, h, computed, toRaw } from "vue";
 import type { Client, Order } from "../types/mainTypes.ts";
 import { ElNotification, ElDialog, ElButton, ElDrawer } from "element-plus";
-import ImprimirDialog from './ImprimirDialog.vue';
 import { Pedido } from "../types/classes/Pedido.ts";
 import { calcularSubtotal, formatDateString } from "../helpers/totales.ts";
 import { useOrdersStore } from "@/stores/orders.ts";
@@ -76,7 +75,7 @@ onMounted(() => {
   loadLastOrders()
 })
 
-function mostrarMensaje(titulo: string, tipo: String, mensaje: string, duration: number) {
+function mostrarMensaje(titulo: string, tipo: 'error' | 'success' | 'warning' | 'info', mensaje: string, duration: number) {
   ElNotification({
     title: titulo,
     message: mensaje,

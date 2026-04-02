@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { Delete } from '@element-plus/icons-vue'
 import { reactive, ref, toRaw, computed, onMounted } from "vue";
-import ImprimirDialog from './ImprimirDialog.vue';
 import type { Order } from "../types/mainTypes.ts";
 import { Pedido } from "../types/classes/Pedido.js";
 import type { Client, SugerenciaPieza, IndividualPiece } from "../types/mainTypes.ts";
@@ -28,7 +27,7 @@ let piezaIndividual = reactive<IndividualPiece>({ descripcion: '', piezas: 0, pr
 let listaPedido: Pedido[] = reactive([]);
 let totalPedidos = ref(0);
 let mensaje = ref('');
-let tipoMensaje = ref('');
+let tipoMensaje = ref<'error' | 'success' | 'warning' | 'info'>('info');
 let comentariosGenerales = ref('');
 let adelanto = ref(0);
 let ordenId = ref(0);
@@ -108,10 +107,10 @@ async function registrarPedido() {
 
 }
 
-function mostrarMensaje(_titulo: string, tipo: string, mensaje: string, duration: number) {
+function mostrarMensaje(_titulo: string, tipo: 'error' | 'success' | 'warning' | 'info', mensaje: string, duration: number) {
   ElNotification({
     title: _titulo,
-    type: "",
+    type: tipo as 'error' | 'success' | 'warning' | 'info',
     message: mensaje,
     duration: duration
   });
@@ -160,6 +159,11 @@ function restartForm() {
 
 function handleClearClient() {
   idCliente = null;
+}
+
+function seleecionarTextoAlFocar(event: FocusEvent) {
+  const target = event.target as HTMLInputElement;
+  target.select();
 }
 
 onMounted(() => {
@@ -249,10 +253,10 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" :min=1 :max=9999 v-model="ropa" :step=.1 :precision=1 />
+                  <el-input-number @focus="seleecionarTextoAlFocar" :min=1 :max=9999 v-model="ropa" :step=.1 :precision=1 />
                 </el-col>
                 <el-col :span=12>
-                  <el-input-number :min=1 :max=9999 placeholder="precio" v-model="precioRopa" :step="1" />
+                  <el-input-number @focus="seleecionarTextoAlFocar" :min=1 :max=9999 placeholder="precio" v-model="precioRopa" :step="1" />
                 </el-col>
               </el-row>
               <el-row>
@@ -278,11 +282,11 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" :min=0 :max=9999 placeholder="Cantidad"
+                  <el-input-number @focus="seleecionarTextoAlFocar" :min=0 :max=9999 placeholder="Cantidad"
                     v-model="planchados.piezas" :step=1 />
                 </el-col>
                 <el-col :span=12>
-                  <el-input-number @focus="$event.target.select()" :min=1 :max=9999 placeholder="precio"
+                  <el-input-number @focus="seleecionarTextoAlFocar" :min=1 :max=9999 placeholder="precio"
                     v-model="precioPlanchado" :step=1 />
                 </el-col>
               </el-row>
@@ -313,7 +317,7 @@ function imprimirPedido() {
               <el-row>
                 <el-col>
                   <el-autocomplete v-model="piezaIndividual.descripcion" placeholder="Almohada, edredon, etc"
-                    :fetch-suggestions="querySearchPieza" @select="handleSelectPieza" clearable />
+                    :fetch-suggestions="querySearchPieza" @onselect="handleSelectPieza" clearable />
                 </el-col>
               </el-row>
               <el-row>
@@ -323,7 +327,7 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" :min=1 placeholder="10, 9"
+                  <el-input-number @focus="seleecionarTextoAlFocar" :min=1 placeholder="10, 9"
                     v-model="piezaIndividual.piezas" />
                 </el-col>
               </el-row>
@@ -334,7 +338,7 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" placeholder="70" :min=20 :step=5
+                  <el-input-number @focus="seleecionarTextoAlFocar" placeholder="70" :min=20 :step=5
                     v-model="piezaIndividual.precio">
                     <template #prefix>
                       <span>$</span>
