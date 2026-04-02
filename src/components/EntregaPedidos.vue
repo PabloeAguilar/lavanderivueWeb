@@ -4,7 +4,7 @@ import { ref, onMounted, h, computed, toRaw } from "vue";
 import type { Client, Order } from "../types/mainTypes.ts";
 import { ElNotification, ElDialog, ElButton, ElDrawer } from "element-plus";
 import { Pedido } from "../types/classes/Pedido.ts";
-import { calcularSubtotal, formatDateString } from "../helpers/totales.ts";
+import { formatDateString } from "../helpers/totales.ts";
 import { useOrdersStore } from "@/stores/orders.ts";
 import { useClientsStore } from "@/stores/clients.ts";
 import { usePedidosStore } from "@/stores/pedidos.ts";
