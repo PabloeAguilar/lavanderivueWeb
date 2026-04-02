@@ -9,7 +9,7 @@ export function calcularSubtotal(pedido: Pedido): number {
     return Math.floor(pedido.price * pedido.quantity);
 }
 
-export function getDateOptions() {
+export function getDateOptions(): Intl.DateTimeFormatOptions {
     return {
         year: "numeric",
         month: "numeric",
