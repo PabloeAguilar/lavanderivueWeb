@@ -207,7 +207,7 @@ const handleSelectPieza = (item: SugerenciaPieza) => {
 
 
 function imprimirPedido() {
-  window.printApi.imprimirRecibo(ordenId.value, toRaw(listaPedido), true);
+  window.print();
 }
 
 </script>
@@ -221,7 +221,7 @@ function imprimirPedido() {
 
   <el-container class="containerModulo">
     <el-row :gutter=20>
-      <el-col :span=12>
+      <el-col :span=12 >
         <el-header>
           Pedido
         </el-header>
@@ -236,7 +236,7 @@ function imprimirPedido() {
               @clear="handleClearClient" placeholder="Nombre del cliente" v-model="nombreCliente" />
           </el-col>
         </el-row>
-        <el-collapse v-model="activeCollapse" accordion>
+        <el-collapse class="no-print" v-model="activeCollapse" accordion>
           <el-collapse-item title="Ropa" name="1">
             <el-main class="registroInfoPedido" style="padding-top: 0;">
               <el-row>
@@ -348,7 +348,7 @@ function imprimirPedido() {
             </el-footer>
           </el-collapse-item>
         </el-collapse>
-        <el-input placeholder="Comentarios adicionales" v-model="comentariosGenerales" />
+        <el-input class="no-print" placeholder="Comentarios adicionales" v-model="comentariosGenerales" />
       </el-col>
       <el-col :span=12>
         <el-header>
@@ -406,7 +406,7 @@ function imprimirPedido() {
           <el-col :span="8" :offset="2">
             <p>Adelanto:</p>
           </el-col>
-          <el-col class="alineadoIzquierda" :span="12" :offset="2">
+          <el-col class="alineadoDerecha" style="display: flex;" :span="12" :offset="2">
             <el-input-number v-model="adelanto" :min="0" @change="onInputAdelanto" />
           </el-col>
         </el-row>
@@ -420,15 +420,15 @@ function imprimirPedido() {
         </el-row>
         <el-footer>
           <el-row v-if="ordenId == 0" style="margin-bottom: 10px">
-            <el-button type="success" @click="registrarPedido">Registrar</el-button>
+            <el-button class="no-print" type="success" @click="registrarPedido">Registrar</el-button>
           </el-row>
           <el-row v-if="ordenId != 0" style="margin-top: 10px">
-            <el-button type="primary" plain @click="imprimirDialogVisible = true">Imprimir</el-button>
+            <el-button class="no-print" type="primary" plain @click="imprimirPedido">Imprimir</el-button>
           </el-row>
           <ImprimirDialog :ordenId="ordenId" :listaPedido="toRaw(listaPedido)" :visible="imprimirDialogVisible"
             @close="imprimirDialogVisible = false" />
           <el-row style="margin-top: 10px">
-            <el-button plain type="danger" @click="restartForm">Limpiar</el-button>
+            <el-button class="no-print" plain type="danger" @click="restartForm">Limpiar</el-button>
           </el-row>
 
         </el-footer>
@@ -456,5 +456,16 @@ function imprimirPedido() {
 .alineadoIzquierda {
   display: flex;
   justify-content: flex-start;
+}
+
+.alineadoDerecha {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
 }
 </style>

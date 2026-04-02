@@ -1,6 +1,6 @@
 <template>
     <el-container>
-      <el-aside>
+      <el-aside class="no-print">
         <MenuLateral @menuCambiado="menuSeleccionado" :lista-menus="listaModulos" />
       </el-aside>
 
@@ -88,6 +88,12 @@ span {
 
 .negrita{
   font-weight: bold;
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
 }
 </style>
 

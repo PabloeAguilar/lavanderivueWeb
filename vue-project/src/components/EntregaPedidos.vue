@@ -215,7 +215,7 @@ async function verPedidosYAgregarActual() {
 
 
 function imprimirPedido() {
-  window.printApi.imprimirRecibo(selectedOrden.value?.id, toRaw(pedidosList.value), true);
+  window.print();
 
 }
 
@@ -226,20 +226,20 @@ function imprimirPedido() {
 
     <el-row gutter="20">
       <el-col :span="12">
-        <el-header>
+        <el-header class="no-print">
           Búsqueda de pedido
         </el-header>
-        <el-row>
+        <el-row class="no-print">
           <el-autocomplete :fetch-suggestions="querySearch" @select="handleSelect" clearable @clear="handleClearClient"
             placeholder="Nombre del cliente" v-model="nombreCliente" />
         </el-row>
 
-        <el-row style="margin-top: 15px" v-if="nombreCliente.trim().length === 0">
+        <el-row class="no-print" style="margin-top: 15px" v-if="nombreCliente.trim().length === 0">
           Últimas ordenes
         </el-row>
 
         <el-row>
-          <el-table empty-text="No hay órdenes" @current-change="handleSelectOrder" highlight-current-row
+          <el-table class="no-print" empty-text="No hay órdenes" @current-change="handleSelectOrder" highlight-current-row
             :data="ordenes" style="width: 100%">
             <el-table-column prop="id" label="No. pedido" />
             <el-table-column label="Cliente">
@@ -338,7 +338,7 @@ function imprimirPedido() {
             </template>
           </template>
           <el-row>
-            <el-button type="info" @click="abrirDialogImprimir">Imprimir</el-button>
+            <el-button type="info" @click="imprimirPedido">Imprimir</el-button>
           </el-row>
           <ImprimirDialog :ordenId="selectedOrden?.id" :listaPedido="toRaw(pedidosList)"
             :visible="imprimirDialogVisible" @close="imprimirDialogVisible = false" />
@@ -465,5 +465,11 @@ function imprimirPedido() {
 
 .dialog-footer {
   text-align: center;
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
 }
 </style>
