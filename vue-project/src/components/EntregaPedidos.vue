@@ -43,7 +43,7 @@ function modificarPedido() {
   modificarComentarios.value = selectedOrden.value.comentarios || '';
   modificarAdelanto.value = selectedOrden.value.adelanto || 0;
   modificarCantidades.value = {};
-  pedidosList.value.forEach((pedido) => { 
+  pedidosList.value.forEach((pedido) => {
     modificarCantidades.value[pedido.id!] = pedido.quantity;
   });
   modificarDialogVisible.value = true;
@@ -51,12 +51,8 @@ function modificarPedido() {
 
 async function guardarModificacionPedido() {
   if (!selectedOrden.value) return;
-  const resp: boolean = await window.electronApi.updateOrden(
-    selectedOrden.value.id,
-    modificarComentarios.value,
-    modificarAdelanto.value
-  );
-  if (resp) {
+  const updatedOrder = ordersStore.updateOrder(selectedOrden.value.id!, { comentarios: modificarComentarios.value, adelanto: modificarAdelanto.value });
+  if (updatedOrder) {
     selectedOrden.value.comentarios = modificarComentarios.value;
     selectedOrden.value.adelanto = modificarAdelanto.value;
     for (const pedido of pedidosList.value) {
@@ -196,10 +192,8 @@ async function entregarMas() {
 // Entregar todos los pedidos en el drawer
 const entregarTodosLosPedidos = async () => {
   for (const orden of ordenesEntregarMas.value) {
-    const resp = await window.electronApi.marcarOrdenComoEntregado(orden.id);
-    if (resp.estatus === 200) {
-      orden.fechaEntrega = resp.data.fechaEntrega;
-    }
+    ordersStore.updateOrder(orden.id!, { fechaEntrega: formatDateString(new Date()) });
+    orden.fechaEntrega = formatDateString(new Date());
   }
   loadLastOrders();
   selectedOrden.value = null;
@@ -212,12 +206,8 @@ const entregarTodosLosPedidos = async () => {
 async function verPedidosYAgregarActual() {
   if (selectedOrden.value && !ordenesEntregarMas.value.some(o => o.id === selectedOrden.value?.id)) {
     ordenesEntregarMas.value.push({ ...selectedOrden.value });
-    const resp = await window.electronApi.getPedidosByOrder(selectedOrden.value.id);
-    if (resp.estatus === 200) {
-      pedidosEntregarMas.value[selectedOrden.value.id] = resp.data.map((p: Pedido) => new Pedido(p.idOrder, p.type, p.quantity, p.price, p.description, formatDateString(new Date()), p.deliveredAt, p.id));
-    } else {
-      pedidosEntregarMas.value[selectedOrden.value.id] = [];
-    }
+    const pedidos = pedidosStore.getPedidosByOrder(selectedOrden.value.id);
+    pedidosEntregarMas.value[selectedOrden.value.id] = pedidos.map(p => new Pedido(p.idOrder, p.type, p.quantity, p.price, p.description, formatDateString(new Date()), p.deliveredAt, p.id));
   }
   entregarMasDialogVisible.value = false;
   drawerVisible.value = true;
@@ -252,7 +242,11 @@ function imprimirPedido() {
           <el-table empty-text="No hay órdenes" @current-change="handleSelectOrder" highlight-current-row
             :data="ordenes" style="width: 100%">
             <el-table-column prop="id" label="No. pedido" />
-            <el-table-column prop="nombre" label="Cliente" />
+            <el-table-column label="Cliente">
+              <template #default="scope">
+                {{ getOrderClientName(scope.row.id) }}
+              </template>
+            </el-table-column>
             <el-table-column prop="fechaRegistro" label="Fecha orden" />
           </el-table>
         </el-row>
@@ -351,9 +345,9 @@ function imprimirPedido() {
           <el-row v-if="!selectedOrden.fechaEntrega" style="margin-top: 1rem">
             <el-button type="primary" @click="abrirDialogEntregar">Entregar</el-button>
           </el-row>
-          <el-row v-if="!selectedOrden.fechaEntrega" style="margin-top: 1rem">
+          <!-- <el-row v-if="!selectedOrden.fechaEntrega" style="margin-top: 1rem">
             <el-button type="warning" @click="modificarPedido">Modificar pedido</el-button>
-          </el-row>
+          </el-row> -->
           <!-- Diálogo para modificar pedido -->
           <el-dialog v-model="modificarDialogVisible" title="Modificar pedido" width="400px"
             :close-on-click-modal="false">
@@ -386,14 +380,16 @@ function imprimirPedido() {
             </template>
           </el-dialog>
           <!-- Diálogo para entregar -->
-          <el-dialog v-model="entregarMasDialogVisible" title="¿Qué desea hacer?" width="350px"
+          <el-dialog v-model="entregarMasDialogVisible" title="¿Desea entregar este pedido?" width="350px"
             :close-on-click-modal="false">
-            <span>¿Desea entregar este pedido o agregarlo a la lista para entregar más?</span>
             <template #footer>
-              <el-button v-if="ordenesEntregarMas.length === 0" @click="marcarComoEntregado"
-                type="primary">Aceptar</el-button>
-              <el-button v-else @click="verPedidosYAgregarActual" type="success">Ver pedidos a entregar</el-button>
-              <el-button @click="entregarMas" type="warning">Entregar más</el-button>
+              <div class="dialog-footer">
+                <el-button v-if="ordenesEntregarMas.length === 0" @click="marcarComoEntregado"
+                  type="primary">Aceptar</el-button>
+              </div>
+
+              <!-- <el-button v-else @click="verPedidosYAgregarActual" type="success">Ver pedidos a entregar</el-button> -->
+              <!-- <el-button @click="entregarMas" type="warning">Entregar más</el-button> -->
             </template>
           </el-dialog>
         </el-main>
@@ -465,5 +461,9 @@ function imprimirPedido() {
 
 .el-header {
   margin-bottom: 20px;
+}
+
+.dialog-footer {
+  text-align: center;
 }
 </style>

@@ -67,6 +67,10 @@ export const usePedidosStore = defineStore('pedidos', () => {
     return updatedPedido
   }
 
+  function getPedidosByOrderId(idOrder: number) {
+    return pedidos.value.filter((pedido) => pedido.idOrder === idOrder)
+  }
+
 
   return {
     pedidos,
@@ -78,5 +82,6 @@ export const usePedidosStore = defineStore('pedidos', () => {
     removePedidoByIndex,
     clearPedidos,
     updatePedido,
+    getPedidosByOrderId,
   }
 })

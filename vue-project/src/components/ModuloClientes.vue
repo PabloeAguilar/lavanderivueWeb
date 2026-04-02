@@ -20,7 +20,7 @@
       <el-table :data="paginatedClients" style="width: 100%" v-loading="loading" pag
         empty-text="No hay clientes para mostrar">
         <el-table-column prop="id" label="ID" width="80" sortable />
-        <el-table-column prop="nombre" label="Nombre" sortable />
+        <el-table-column prop="name" label="Nombre" sortable />
         <el-table-column prop="telefono" label="Teléfono" sortable />
 
         <el-table-column label="Acciones" width="140">
@@ -62,10 +62,10 @@
     <el-dialog v-model="dialogVisible" :title="`Editar Cliente ${editingClient?.id}`" width="30%">
       <el-form :model="editingClient" label-position="top" @submit.prevent="saveClient">
         <el-form-item label="Nombre">
-          <el-input v-model="editingClient.name" />
+          <el-input v-model="editingClient!.name" />
         </el-form-item>
         <el-form-item label="Teléfono">
-          <el-input v-model="editingClient.phone" />
+          <el-input v-model="editingClient!.phone" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -80,8 +80,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, toRaw } from 'vue'
-import { Search, Edit, Plus } from '@element-plus/icons-vue'
-import { ElCol, ElCollapse, ElContainer, ElHeader, ElMain, ElMessage, ElNotification, ElRow, ElTable } from 'element-plus'
+import { Search, Edit } from '@element-plus/icons-vue'
+import { ElCol, ElContainer, ElHeader, ElMain, ElMessage, ElNotification, ElRow, ElTable } from 'element-plus'
 import type { Client } from "../types/mainTypes.ts";
 import { useClientsStore } from '@/stores/clients.ts';
 

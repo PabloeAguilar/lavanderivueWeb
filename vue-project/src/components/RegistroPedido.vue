@@ -2,12 +2,16 @@
 import { Delete } from '@element-plus/icons-vue'
 import { reactive, ref, toRaw, computed, onMounted } from "vue";
 import ImprimirDialog from './ImprimirDialog.vue';
+import type { Order } from "../types/mainTypes.ts";
 import { Pedido } from "../types/classes/Pedido.js";
 import type { Client, SugerenciaPieza, IndividualPiece } from "../types/mainTypes.ts";
 import { ElNotification, ElAlert, ElAutocomplete, ElContainer, ElButton,
   ElCollapse, ElCollapseItem, ElMain, ElInputNumber, ElInput, ElFooter, ElRow, ElCol, ElHeader } from "element-plus";
 import { useClientsStore } from '@/stores/clients.ts';
 import { getListOfSuggestions } from '@/helpers/stores.ts';
+import { useOrdersStore } from '@/stores/orders.ts';
+import { formatDateString } from '@/helpers/totales.ts';
+import { usePedidosStore } from '@/stores/pedidos.ts';
 
 const clientsStore = useClientsStore();
 let activeCollapse = ref<string | number>('1');
@@ -88,15 +92,19 @@ async function registrarPedido() {
     reiniciarMensaje();
     return;
   }
-  const result = await window.electronApi.insertOrden(nombreCliente.value, toRaw(listaPedido), comentariosGenerales.value, adelanto.value, idCliente);
-  if (result.estatus == 200) {
-    ordenId.value = result.data.orden.data
-    mostrarMensaje("Guardado correcto", "success", "registro guardado", 5000)
-  } else {
-    mensaje.value = result.statusText;
-    tipoMensaje.value = 'error'
+  const idClienteObtenido = clientsStore.getClientIdByName(nombreCliente.value);
+  const newOrder = {
+    fechaRegistro: formatDateString(new Date()),
+    clientIndex: idClienteObtenido,
+    comentarios: comentariosGenerales.value,
+    adelanto: adelanto.value,
   }
+  const addedOrder =useOrdersStore().addOrder(newOrder);
+  listaPedido.forEach(pedido => {
+    usePedidosStore().addPedido(new Pedido(addedOrder.id, pedido.type, pedido.quantity, pedido.price, pedido.description))
+  })
   reiniciarMensaje();
+  ordenId.value = addedOrder.id!;
 
 }
 
@@ -205,14 +213,14 @@ function imprimirPedido() {
 </script>
 
 <template>
-  <el-row style="margin-bottom: 20px" gutter=20 v-if="mensaje.length > 0">
+  <el-row style="margin-bottom: 20px" :gutter=20 v-if="mensaje.length > 0">
     <el-col :span=24>
       <el-alert @close="onCloseMensaje" :type="tipoMensaje"> {{ mensaje }}</el-alert>
     </el-col>
   </el-row>
 
   <el-container class="containerModulo">
-    <el-row gutter=20>
+    <el-row :gutter=20>
       <el-col :span=12>
         <el-header>
           Pedido
@@ -241,10 +249,10 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" min=1 max=9999 v-model="ropa" step=.1 precision=1 />
+                  <el-input-number @focus="$event.target.select()" :min=1 :max=9999 v-model="ropa" :step=.1 :precision=1 />
                 </el-col>
                 <el-col :span=12>
-                  <el-input-number min=1 max=9999 placeholder="precio" v-model="precioRopa" step="1" />
+                  <el-input-number :min=1 :max=9999 placeholder="precio" v-model="precioRopa" :step="1" />
                 </el-col>
               </el-row>
               <el-row>
@@ -270,12 +278,12 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" min=0 max=9999 placeholder="Cantidad"
-                    v-model="planchados.piezas" step=1 />
+                  <el-input-number @focus="$event.target.select()" :min=0 :max=9999 placeholder="Cantidad"
+                    v-model="planchados.piezas" :step=1 />
                 </el-col>
                 <el-col :span=12>
-                  <el-input-number @focus="$event.target.select()" min=1 max=9999 placeholder="precio"
-                    v-model="precioPlanchado" step=1 />
+                  <el-input-number @focus="$event.target.select()" :min=1 :max=9999 placeholder="precio"
+                    v-model="precioPlanchado" :step=1 />
                 </el-col>
               </el-row>
               <el-row>
@@ -315,7 +323,7 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" min=1 placeholder="10, 9"
+                  <el-input-number @focus="$event.target.select()" :min=1 placeholder="10, 9"
                     v-model="piezaIndividual.piezas" />
                 </el-col>
               </el-row>
@@ -326,7 +334,7 @@ function imprimirPedido() {
               </el-row>
               <el-row>
                 <el-col :span=12 class="alineadoIzquierda">
-                  <el-input-number @focus="$event.target.select()" placeholder="70" min=20 step=5
+                  <el-input-number @focus="$event.target.select()" placeholder="70" :min=20 :step=5
                     v-model="piezaIndividual.precio">
                     <template #prefix>
                       <span>$</span>
@@ -346,7 +354,7 @@ function imprimirPedido() {
         <el-header>
           Resumen
         </el-header>
-        <el-row gutter=20>
+        <el-row :gutter=20>
           <el-col :span=2>
 
           </el-col>
@@ -360,7 +368,7 @@ function imprimirPedido() {
             <p>Subtotal</p>
           </el-col>
         </el-row>
-        <el-row v-for="(item, index) in listaPedido" :key="index" gutter=20>
+        <el-row v-for="(item, index) in listaPedido" :key="index" :gutter=20>
           <el-col :span="2">
             <el-button v-if="ordenId == 0" circle @click="removerSubpedido(index)" type="danger" :icon="Delete" />
           </el-col>
@@ -399,7 +407,7 @@ function imprimirPedido() {
             <p>Adelanto:</p>
           </el-col>
           <el-col class="alineadoIzquierda" :span="12" :offset="2">
-            <el-input-number v-model="adelanto" min="0" @change="onInputAdelanto" />
+            <el-input-number v-model="adelanto" :min="0" @change="onInputAdelanto" />
           </el-col>
         </el-row>
         <el-row :gutter=20>

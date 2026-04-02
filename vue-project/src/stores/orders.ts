@@ -67,6 +67,10 @@ export const useOrdersStore = defineStore('orders', () => {
     return orders.value.slice(offset)
   }
 
+  function getOrdersByDate(stringDate:string) {
+    return orders.value.filter((order) => order.fechaRegistro.startsWith(stringDate))
+  }
+
   return {
     orders,
     totalOrders,
@@ -78,5 +82,6 @@ export const useOrdersStore = defineStore('orders', () => {
     removeOrder,
     clearOrders,
     getOrders,
+    getOrdersByDate,
   }
 })

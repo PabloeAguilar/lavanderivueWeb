@@ -53,6 +53,15 @@ export const useClientsStore = defineStore('clients', () => {
     clients.value = []
   }
 
+  function getClientIdByName(name: string) {
+    const client = clients.value.find((c) => c.name === name)
+    if (!client) {
+      addClient({ name })
+      return clients.value[clients.value.length - 1]!.id
+    }
+    return client.id
+  }
+
   return {
     clients,
     totalClients,
@@ -62,5 +71,6 @@ export const useClientsStore = defineStore('clients', () => {
     updateClient,
     removeClient,
     clearClients,
+    getClientIdByName,
   }
 })

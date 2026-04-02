@@ -55,13 +55,14 @@
 import { ElCol, ElContainer, ElDatePicker, ElHeader, ElMain, ElRow, ElScrollbar } from 'element-plus';
 import { computed, onMounted, ref } from 'vue';
 import type { Order } from '../types/mainTypes.ts';
-import { Pedido } from '../types/classes/Pedido.ts';
 import { getOrderClientName } from '@/helpers/stores.ts';
-import { getDateOptions, dateFormats } from '@/helpers/totales.ts';
+import { getDateOptions, dateFormats, formatDateString } from '@/helpers/totales.ts';
+import { useOrdersStore } from '@/stores/orders.ts';
+import { usePedidosStore } from '@/stores/pedidos.ts';
 
 const fecha = ref(new Date());
 const fechaFormateada = computed(() => {
-    return new Intl.DateTimeFormat("sv-SE", getDateOptions()).format(fecha.value);
+    return formatDateString(fecha.value);
 });
 const pedidos = ref<OrdenConPedidos[]>([]);
 
@@ -72,28 +73,25 @@ onMounted(() => {
 });
 
 async function cargarPedidosPorFecha(fechaSeleccionada: Date) {
-    const fechaString = new Intl.DateTimeFormat(dateFormats, getDateOptions()).format(fechaSeleccionada);
-    window.electronApi.getOrdersByDate(fechaString).then(async (orders: Order[]) => {
-        let ordenesConPedidos: OrdenConPedidos[] = [];
-        for (const order of orders) {
-            ordenesConPedidos.push({
-                ...order,
-                pedidos: [],
-            });
-            ordenesConPedidos[ordenesConPedidos.length - 1]!.pedidos = (await window.electronApi.getPedidosByOrder(order.id!)).data;
-        }
-        pedidos.value = ordenesConPedidos;
-        og({ pedidos })
-
+    const fechaString = formatDateString(fechaSeleccionada);
+    const ordenes = useOrdersStore().getOrdersByDate(fechaString);
+    let ordenesConPedidos: OrdenConPedidos[] = [];
+    ordenes.forEach((order) => {
+        ordenesConPedidos.push({
+            ...order,
+            pedidos: [],
+        });
+        ordenesConPedidos[ordenesConPedidos.length - 1]!.pedidos = usePedidosStore().getPedidosByOrderId(order.id!);
     });
+    pedidos.value = ordenesConPedidos;
 }
 
 const ordenesRecibidas = computed(() => {
-    return pedidos.value.filter((pedido) => pedido.fechaRegistro?.startsWith(new Intl.DateTimeFormat(dateFormats, getDateOptions()).format(fecha.value)));
+    return pedidos.value.filter((pedido) => pedido.fechaRegistro?.startsWith(formatDateString(fecha.value)));
 });
 
 const ordenesEntregadas = computed(() => {
-    return pedidos.value.filter((pedido) => pedido.fechaEntrega?.startsWith(new Intl.DateTimeFormat(dateFormats, getDateOptions()).format(fecha.value)));
+    return pedidos.value.filter((pedido) => pedido.fechaEntrega?.startsWith(formatDateString(fecha.value)));
 });
 
 const cantidadRecibida = computed(() => {
@@ -110,7 +108,19 @@ function onDateChange(selectedDate: Date) {
 }
 
 interface OrdenConPedidos extends Order {
-    pedidos: Pedido[];
+    pedidos: PedidoStoreItem[];
+}
+
+interface PedidoStoreItem {
+    readonly subtotal: number;
+    idOrder: number;
+    type: string;
+    quantity: number;
+    price: number;
+    description: string | null;
+    registredAt: string;
+    deliveredAt: string | null;
+    id?: number;
 }
 </script>
 
