@@ -33,10 +33,12 @@ export const useClientsStore = defineStore('clients', () => {
     const index = clients.value.findIndex((client) => client.id === id)
     if (index === -1) return null
 
-    clients.value[index] = {
+    const updatedClient: Client = {
       ...clients.value[index],
       ...changes,
-    }
+    } as Client
+
+    clients.value[index] = updatedClient
 
     return clients.value[index]
   }

@@ -43,7 +43,7 @@ export const useOrdersStore = defineStore('orders', () => {
     orders.value[index] = {
       ...orders.value[index],
       ...changes,
-    }
+    } as Order
 
     return orders.value[index]
   }
@@ -67,7 +67,7 @@ export const useOrdersStore = defineStore('orders', () => {
     return orders.value.slice(offset)
   }
 
-  function getOrdersByDate(stringDate:string) {
+  function getOrdersByDate(stringDate: string) {
     return orders.value.filter((order) => order.fechaRegistro.startsWith(stringDate))
   }
 

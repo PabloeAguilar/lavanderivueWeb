@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { Pedido } from '../types/classes/Pedido'
+import { formatDateString } from '../helpers/totales'
 
 export const usePedidosStore = defineStore('pedidos', () => {
   const pedidos = ref<Pedido[]>([])
@@ -31,6 +32,8 @@ export const usePedidosStore = defineStore('pedidos', () => {
       data.quantity,
       data.price,
       data.description ?? null,
+      formatDateString(new Date()),
+      null,
       data.id,
     )
     pedidos.value.push(pedido)
@@ -51,7 +54,7 @@ export const usePedidosStore = defineStore('pedidos', () => {
     pedidos.value = []
   }
 
-  function updatePedido(id: number, changes: Partial<Omit<Pedido, 'id' >>) {
+  function updatePedido(id: number, changes: Partial<Omit<Pedido, 'id'>>) {
     const index = pedidos.value.findIndex((pedido) => pedido.id === id)
     if (index === -1) return null
     const pedido = pedidos.value[index]
@@ -61,8 +64,11 @@ export const usePedidosStore = defineStore('pedidos', () => {
       changes.quantity ?? pedido!.quantity,
       changes.price ?? pedido!.price,
       changes.description ?? pedido!.description,
-      pedido!.id,)
-      
+      pedido!.registredAt,
+      changes.deliveredAt ?? pedido!.deliveredAt,
+      id,
+    )
+
     pedidos.value[index] = updatedPedido
     return updatedPedido
   }
