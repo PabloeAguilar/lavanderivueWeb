@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    container_name: lavanderivue_web
+    ports:
+      - "3001:80"  # Puerto host : Puerto contenedor
+    restart: unless-stopped
